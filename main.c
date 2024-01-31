@@ -1,33 +1,48 @@
+#include <stdio.h>
 #include "monty.h"
-stack_t *header = NULL;
+#include <stdlib.h>
 
+bus_t bus = {NULL, NULL, NULL, 0};
 /**
-* main - The first entry of the program that is being run in the program
-*       that has been made in the progress
-* @ag_c: The command line numbers argumentative
-* @ag_v: THe array for whch we have the arguments
-*
-* Return: Always the zero formart within the programs
+* main - monty code interpreter
+* @argc: number of arguments
+* @argv: monty file location
+* Return: 0 on success
 */
-
-int main(int ag_c, char **ag_v)
+int main(int argc, char *argv[])
 {
-if (ag_c < 2)
-error_output(1);
+	char *content;
+	FILE *file;
+	size_t size = 0;
+	ssize_t read_line = 1;
+	stack_t *stack = NULL;
+	unsigned int counter = 0;
 
-else
-{
-if (ag_c > 2)
-error_output(1);
-
-else
-{
-file_opener(ag_v[1]);
-
-nodes_free();
-
-return (0);
-}
-}
+	if (argc != 2)
+	{
+		fprintf(stderr, "USAGE: monty file\n");
+		exit(EXIT_FAILURE);
+	}
+	file = fopen(argv[1], "r");
+	bus.file = file;
+	if (!file)
+	{
+		fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
+		exit(EXIT_FAILURE);
+	}
+	while (read_line > 0)
+	{
+		content = NULL;
+		read_line = getline(&content, &size, file);
+		bus.content = content;
+		counter++;
+		if (read_line > 0)
+		{
+			execute(content, &stack, counter, file);
+		}
+		free(content);
+	}
+	free_stack(stack);
+	fclose(file);
 return (0);
 }
